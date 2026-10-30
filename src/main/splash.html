@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hebergia</title>
+  <style>
+    :root { font-family: "Segoe UI", Arial, sans-serif; color: #123b58; }
+    * { box-sizing: border-box; }
+    html, body { width: 100%; height: 100%; margin: 0; overflow: hidden; }
+    body { position: relative; background: #f7fbff; }
+    .background { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+    .shade { position: absolute; inset: 0; background: linear-gradient(90deg, rgba(255,255,255,.05) 35%, rgba(255,255,255,.28)); }
+    .info { position: absolute; left: 48px; bottom: 36px; width: 330px; padding: 20px 22px; border-radius: 16px; background: rgba(255,255,255,.91); box-shadow: 0 12px 35px rgba(18,59,88,.18); }
+    .name { margin: 0; font-size: 24px; font-weight: 800; letter-spacing: .3px; }
+    .meta { margin-top: 7px; color: #55718a; font-size: 13px; }
+    .message { margin: 18px 0 9px; font-size: 12px; font-weight: 600; color: #55718a; }
+    .track { height: 7px; overflow: hidden; border-radius: 99px; background: #dce8ef; }
+    .progress { width: 0; height: 100%; border-radius: inherit; background: linear-gradient(90deg, #148c58, #f2a51e, #1261b1); animation: load 5s linear forwards; }
+    @keyframes load { to { width: 100%; } }
+  </style>
+</head>
+<body>
+  <img class="background" src="../../assets/splash.png" alt="">
+  <div class="shade"></div>
+  <section class="info" aria-live="polite">
+    <h1 class="name">Hebergia</h1>
+    <div class="meta" id="version">Version 1.0.0 · Développé par ABDULKARIM</div>
+    <div class="message">Préparation de votre espace…</div>
+    <div class="track"><div class="progress"></div></div>
+  </section>
+  <script>
+    const query = new URLSearchParams(location.search);
+    const version = query.get('version');
+    const developer = query.get('developer') || 'ABDULKARIM';
+    if (version) document.querySelector('#version').textContent = `Version ${version} · Développé par ${developer}`;
+  </script>
+</body>
+</html>

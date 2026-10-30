@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HÉBERGEMENT — Gestion de l'hébergement · Résidence universitaire 1er Novembre 1954</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=block" rel="stylesheet">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='18' fill='%230c2f2b'/><rect x='22' y='30' width='24' height='48' fill='%23d8a03d'/><rect x='52' y='18' width='26' height='60' fill='%23e8f0ee'/></svg>">
+<script type="module">
+window.loadExcelJS=async()=>{
+  if(window.ExcelJS) return window.ExcelJS;
+  try {
+    const {default:ExcelJS}=await import('exceljs');
+    window.ExcelJS=ExcelJS;
+  } catch(error) {
+    if(location.protocol!=='file:') throw error;
+    await new Promise((resolve,reject)=>{
+      const script=document.createElement('script');
+      script.src=new URL('../../node_modules/exceljs/dist/exceljs.min.js',document.baseURI).href;
+      script.onload=resolve;
+      script.onerror=()=>reject(new Error(`ExcelJS n’a pas pu être chargé depuis node_modules : ${script.src}`));
+      document.head.appendChild(script);
+    });
+    if(!window.ExcelJS) throw new Error('ExcelJS a été chargé, mais sa bibliothèque navigateur est indisponible.');
+  }
+  return window.ExcelJS;
+};
+</script>
+<link rel="stylesheet" href="./style.css">
+</head>
+<body>
+
+<!-- ============================================================
+     ÉCRAN DE CONNEXION
+     ============================================================ -->
+<div id="login">
+  <div class="login-left">
+    <div>
+      <div class="login-brand"><img src="assets/icon.png" alt="Hebergia"><span>HEBERGIA</span></div>
+      <div class="login-over">Service d'hébergement de la résidence universitaire</div>
+      <h1>Gestion de<br>l'<em>hébergement</em></h1>
+      <p class="lead">Étudiants, chambres, affectations et réclamations —
+        pilotés depuis une seule interface, bloc par bloc.</p>
+      <div class="skyline" id="skyline" aria-hidden="true"></div>
+        <div class="login-stats" id="login-stats"></div>
+    </div>
+    <div class="login-footer" style="font-size:11px;color:#6e8d87">Hebergia · © 2026 · Développé par ABDULKARIM · Version 1.0.0</div>
+  </div>
+  <div class="login-right">
+    <div class="login-card">
+      <img class="login-card-brand" src="../../assets/Hebergia_logo.png" alt="Hebergia">
+      <h2>Connexion</h2>
+      <div class="hint">Identifiez-vous pour accéder à votre espace.</div>
+      <div class="login-err" id="login-err" hidden></div>
+      <form id="login-form" autocomplete="on">
+        <div class="field" style="margin-bottom:13px">
+          <label for="lg-user">Nom d'utilisateur</label>
+          <input class="inp" id="lg-user" required placeholder="Nom d'utilisateur ou téléphone">
+        </div>
+        <div class="field" style="margin-bottom:12px">
+          <label for="lg-pass">Mot de passe</label>
+          <input class="inp" id="lg-pass" type="password" required placeholder="••••••••">
+        </div>
+        <div class="login-options">
+          <label class="remember-option"><input type="checkbox" id="lg-remember"> <span>Se souvenir de moi</span></label>
+          <a class="forgot-link" href="#" id="forgot-password">Mot de passe oublié&nbsp;?</a>
+        </div>
+        <button class="btn btn-primary" type="submit" style="width:100%;justify-content:center">Se connecter</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     COQUILLE APPLICATIVE
+     ============================================================ -->
+<div id="app" hidden>
+  <aside id="sidebar">
+    <div class="brand">
+      <div class="brand-identity"><img class="brand-mark" src="assets/icon.png" alt="HÉBERGIA">
+        <div><div class="brand-name">HÉBERGIA</div><div class="brand-sub">Résidence universitaire Pepiniere</div></div>
+      </div>
+    </div>
+    <nav aria-label="Navigation principale">
+      <div class="nav-cap">Navigation</div>
+      <button class="nav-item" data-nav="dashboard" id="nav-dashboard"></button>
+      <button class="nav-item" data-nav="students" id="nav-students"></button>
+      <button class="nav-item" data-nav="renewal-tracking" id="nav-renewals"></button>
+      <button class="nav-item" data-nav="rooms" id="nav-rooms"></button>
+      <button class="nav-item" data-nav="history" id="nav-history"></button>
+      <button class="nav-item" data-nav="reports" id="nav-reports"></button>
+    </nav>
+    <div class="side-foot">
+      <div class="side-profile">
+        <div class="side-user" data-action="profile-menu-toggle" title="Ouvrir le menu du profil">
+          <span class="avatar" id="chip-avatar">?</span>
+          <div class="side-user-info"><div class="chip-name" id="chip-name"></div><div class="side-user-hint" id="chip-role"></div></div>
+        </div>
+        <div class="side-menu" id="profile-menu" hidden>
+          <button data-action="about-app">ⓘ <span>À propos de l’application</span></button>
+          <button data-action="settings">⚙ <span>Paramètres</span></button>
+          <button data-action="profile-edit">✎ <span>Edit my profile</span></button>
+          <button data-action="logout">↪ <span>Déconnexion</span></button>
+        </div>
+      </div>
+      <div class="side-version">Hebergia par ABDULKARIM | Version 1.0.0</div>
+    </div>
+  </aside>
+  <div id="sidebar-backdrop" aria-hidden="true"></div>
+  <div id="sidebar-resizer" class="sidebar-resizer" role="separator" aria-orientation="vertical" aria-label="Redimensionner la barre latérale" aria-valuemin="190" aria-valuemax="380" tabindex="0"></div>
+
+  <div id="main">
+    <header id="topbar">
+      <button class="tb-tool sidebar-edge-toggle" id="sidebar-edge-toggle" type="button" data-action="toggle-sidebar" aria-controls="sidebar" aria-expanded="true" title="Réduire la barre latérale" aria-label="Réduire la barre latérale"></button>
+      <div><h1 id="tb-title">Tableau de bord</h1><div class="tb-sub" id="tb-sub"></div></div>
+      <div class="tb-right">
+        <button class="btn btn-primary" id="tb-action" hidden></button>
+        <span class="tb-date" id="tb-date"></span>
+        <div class="tb-tools" aria-label="Outils de l’application">
+          <button class="tb-tool" type="button" data-action="settings" title="Paramètres" aria-label="Paramètres" id="tb-settings"></button>
+          <button class="tb-tool" type="button" data-action="toggle-theme" title="Changer de thème" aria-label="Changer de thème" id="tb-theme-toggle"></button>
+          <button class="tb-tool" type="button" data-action="about-app" title="À propos de l’application" aria-label="À propos de l’application" id="tb-about"></button>
+        </div>
+      </div>
+    </header>
+
+    <main id="content">
+
+      <!-- ===== VUE : TABLEAU DE BORD ===== -->
+      <section class="view" id="view-dashboard">
+        <section class="dashboard-hero" aria-labelledby="dash-hero-title">
+          <div class="dashboard-hero-copy">
+            <div class="dashboard-hero-kicker">Pilotage de la résidence</div>
+            <h2 id="dash-hero-title">La résidence, en un coup d’œil</h2>
+            <div class="dashboard-priority" id="dashboard-priority" aria-live="polite" aria-atomic="true"></div>
+            <div class="dashboard-hero-actions">
+              <button class="btn btn-hero btn-hero-primary" data-nav-go="rooms">Voir les chambres</button>
+              <button class="btn btn-hero" data-action="new-student">Ajouter un résident</button>
+            </div>
+          </div>
+          <div class="dashboard-hero-metric">
+            <div>
+              <div class="lbl">Occupation des lits</div>
+              <div class="val" id="k-occ">0%</div>
+              <div class="sub" id="k-occ-sub"></div>
+            </div>
+            <canvas id="k-gauge" width="56" height="56" aria-hidden="true"></canvas>
+          </div>
+        </section>
+        <div class="kpis dashboard-kpis">
+          <div class="kpi k-ok"><div class="lbl">Résidents hébergés</div><div class="val" id="k-heb">0</div><div class="sub" id="k-heb-sub"></div></div>
+          <div class="kpi k-info"><div class="lbl">Lits libres</div><div class="val" id="k-beds-free">0</div><div class="sub" id="k-beds-free-sub"></div></div>
+          <div class="kpi k-info"><div class="lbl">Chambres avec places</div><div class="val" id="k-dispo">0</div><div class="sub" id="k-dispo-sub"></div></div>
+          <div class="kpi k-info"><div class="lbl">Nouveaux Bacheliers</div><div class="val" id="k-new-bachelors">0</div><div class="sub" id="k-new-bachelors-sub"></div></div>
+          <div class="kpi k-info"><div class="lbl">Lits utilisables</div><div class="val" id="k-beds-usable">0</div><div class="sub" id="k-beds-usable-sub"></div></div>
+        </div>
+        <div class="charts">
+          <div class="card dashboard-chart-card"><div class="card-h"><h3 id="dash-bar-title">Occupation</h3></div>
+            <div class="dashboard-chart-note" id="dash-bar-note"></div>
+            <div class="card-b"><canvas id="ch-bar" aria-label="Graphique du taux d’occupation" role="img"></canvas></div></div>
+          <div class="card dashboard-status-card"><div class="card-h"><h3>Capacité et disponibilité</h3></div>
+            <ul class="dashboard-status-list" id="dash-room-status"></ul></div>
+        </div>
+        <section class="card dashboard-renewal-card" aria-labelledby="dash-renewal-title">
+          <div class="card-h"><h3 id="dash-renewal-title">Suivi des renouvellements</h3><span class="spacer"></span>
+            <span class="badge b-neutral" id="dash-renewal-period"></span>
+            <button class="btn btn-ghost btn-sm" data-nav-go="renewal-tracking">Ouvrir le suivi</button></div>
+          <div class="dashboard-renewal-grid" id="dash-renewal-stages"></div>
+          <p class="dashboard-renewal-note" id="dash-renewal-note"></p>
+        </section>
+        <div class="dash-lower">
+          <div class="card"><div class="card-h"><h3>Derniers mouvements</h3><span class="spacer"></span>
+            <button class="btn btn-ghost btn-sm" data-nav-go="history">Tout voir</button></div>
+            <div class="card-b"><ul class="mini-list" id="dash-activity"></ul></div></div>
+        </div>
+      </section>
+
+      <!-- ===== VUE : RAPPORTS ===== -->
+      <section class="view" id="view-reports" hidden>
+        <div id="reports-root"></div>
+      </section>
+
+      <!-- ===== VUE : ÉTUDIANTS ===== -->
+      <section class="view" id="view-students" hidden>
+        <div class="toolbar">
+          <div id="stu-scopenote"></div>
+          <div class="search" id="stu-searchwrap"></div>
+          <select class="inp" style="width:150px" data-f="students.statut" id="stu-statut"></select>
+          <select class="inp" style="width:140px" data-f="students.annee" id="stu-annee"></select>
+          <select class="inp" style="width:130px" data-f="students.sexe" id="stu-sexe" aria-label="Filtrer par sexe"></select>
+          <select class="inp" style="width:150px" data-f="students.bloc" id="stu-bloc"></select>
+          <select class="inp academic-year-filter" style="width:110px" data-f="students.academicYear" id="stu-academic-year"></select>
+        </div>
+        <div class="cnt" id="stu-count"></div>
+        <div class="table-actions" id="students-table-actions"><span id="students-unassigned-action"></span><button class="btn btn-ghost" data-action="renewal-tracking">Suivi des renouvellements</button><div class="export-control-host" id="students-export-control"></div></div>
+        <div class="tbl-wrap">
+          <table class="tbl">
+            <thead><tr><th>Matricule</th><th>Étudiant</th><th>Filière</th><th>Chambre</th><th>Statut</th><th class="actions">Actions</th></tr></thead>
+            <tbody id="stu-tbody"></tbody>
+          </table>
+        </div>
+        <div id="students-pagination"></div>
+      </section>
+
+      <section class="view" id="view-renewal-tracking" hidden>
+        <div class="toolbar"><button class="btn btn-ghost" data-nav="students"><span aria-hidden="true">←</span> Retour aux résidents</button></div>
+        <div id="renewal-tracking-root"></div>
+      </section>
+
+      <section class="view" id="view-student-detail" hidden>
+        <div id="student-fiche-root"></div>
+      </section>
+
+      <!-- ===== VUE : CHAMBRES ===== -->
+      <section class="view" id="view-rooms" hidden>
+        <div class="toolbar">
+          <span class="spacer"></span><button class="btn btn-ghost rooms-pdf-button" type="button" data-action="rooms-pdf">Exporter en PDF</button><div class="export-control-host" id="rooms-export-control"></div>
+        </div>
+        <div id="room-tabs" class="room-tabs" role="tablist" aria-label="Blocs"></div>
+        <div id="rooms-container"></div>
+      </section>
+
+      <!-- ===== VUE : HISTORIQUE ===== -->
+      <section class="view" id="view-history" hidden>
+        <div class="toolbar">
+          <div id="h-scopenote"></div>
+          <select class="inp" style="width:140px" data-f="hist.bloc" id="h-bloc"></select>
+          <select class="inp" style="width:160px" data-f="hist.type" id="h-type"></select>
+          <input type="text" class="inp" style="width:150px" data-f="hist.from" id="h-from" title="Du" placeholder="dd/mm/yyyy" inputmode="numeric">
+          <input type="text" class="inp" style="width:150px" data-f="hist.to" id="h-to" title="Au" placeholder="dd/mm/yyyy" inputmode="numeric">
+          <div class="search" id="h-searchwrap"></div>
+          <span class="spacer"></span>
+          <div class="export-control-host" id="history-export-control"></div>
+          <select class="inp academic-year-filter" style="width:100px" data-f="hist.academicYear" id="h-academic-year"></select>
+        </div>
+        <div class="cnt" id="h-count"></div>
+        <div class="card"><div class="card-b"><ul class="tl" id="h-list"></ul></div></div>
+      </section>
+
+      <!-- ===== VUE : UTILISATEURS (admin) ===== -->
+      <section class="view" id="view-users" hidden>
+        <div class="toolbar"><span class="spacer"></span></div>
+        <div class="cnt" id="us-count"></div>
+        <div class="tbl-wrap">
+          <table class="tbl">
+            <thead><tr><th>Nom</th><th>Identifiant</th><th>Rôle</th><th>Bloc</th><th>État</th><th class="actions">Actions</th></tr></thead>
+            <tbody id="us-tbody"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ===== VUE : SETTINGS ===== -->
+      <section class="view" id="view-import" hidden>
+        <div id="import-wizard-root"></div>
+      </section>
+
+      <!-- ===== VUE : SETTINGS ===== -->
+      <section class="view" id="view-settings" hidden>
+        <div id="settings-page-root"></div>
+      </section>
+
+    </main>
+  </div>
+</div>
+
+<div id="modal-root"></div>
+<div id="toast-root"></div>
+
+<script type="module" src="./app.mjs"></script>
+</body>
+</html>
